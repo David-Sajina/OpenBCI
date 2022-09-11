@@ -7,6 +7,10 @@ import os
 import random
 import time
 
+def unison_shuffled_copies(a, b):
+    assert len(a) == len(b)
+    p = np.random.permutation(len(a))
+    return a[p], b[p]
 
 ACTIONS = ["krug", "kvadrat", "trokut"]
 #reshape = (-1, 16, 60)
@@ -49,7 +53,7 @@ def create_data(starting_dir="data"):
                 combined_data.append([data, 2])
 
    # np.random.shuffle(combined_data)
-    print("length:",len(combined_data))
+    print("length:", len(combined_data))
     return combined_data
 
 
@@ -87,37 +91,62 @@ test_X = np.array([test_X[n:n+param] for n in range(0, len(test_X), param)])
 y = [test_y[i] for i in range(0, len(test_y), param)]
 test_y = np.array(y)
 
-print(train_X.shape)
-print(train_y.shape)
-# samples, rows, cols, channels
-
-
-model = Sequential()
-model.add(Conv2D(32, (5, 5), padding="same", activation='relu', input_shape=train_X.shape[1:]))
-model.add(MaxPooling2D((5, 5), padding="same"))
-model.add(Conv2D(64, (5, 5), padding="same", activation='relu'))
-model.add(MaxPooling2D((5, 5), padding="same"))
-model.add(Conv2D(128, (5, 5), padding="same", activation='relu'))
-model.add(Flatten())
-model.add(Dense(100))
-model.add(Dense(3, activation="softmax"))
-
-model.compile(loss='sparse_categorical_crossentropy',
-              optimizer='adam',
-              metrics=['accuracy'])
+#unison_shuffled_copies(train_X, train_y)
 indices = np.random.permutation(len(train_X))
 train_X = train_X[indices]
 train_y = train_y[indices]
+
+print("shape:", train_X.shape)
+print("shape:", train_y.shape)
+print("shapet:", test_X.shape)
+print("shapet:", test_y.shape)
+
+# samples, rows, cols, channels
+opt = tf.keras.optimizers.Adam(
+    learning_rate=0.0007,
+    beta_1=0.9,
+    beta_2=0.999,
+    epsilon=1e-07,
+    amsgrad=False,
+    name='Adam',
+)
+
+model = Sequential()
+model.add(Conv2D(16, (5, 5), padding="same", activation='relu', input_shape=train_X.shape[1:]))
+model.add(BatchNormalization())
+model.add(MaxPooling2D((5, 5), padding="same"))
+
+model.add(Conv2D(32, (5, 5), padding="same", activation='relu'))
+model.add(BatchNormalization())
+model.add(MaxPooling2D((5, 5), padding="same"))
+
+
+model.add(Conv2D(128, (5, 5), padding="same", activation='relu'))
+model.add(BatchNormalization())
+model.add(MaxPooling2D((5, 5), padding="same"))
+
+model.add(Flatten())
+
+#model.add(Dense(256))
+model.add(Dense(128))
+model.add(Dense(64))
+model.add(Dense(3, activation="softmax"))
+
+model.compile(loss='sparse_categorical_crossentropy',
+              optimizer=opt,
+              metrics=['accuracy'])
+
 epochs = 10
 batch_size = 32
 model.summary()
 for epoch in range(epochs):
     model.fit(train_X, train_y, batch_size=batch_size, epochs=1, validation_data=(test_X, test_y))
     print((epoch+1)*10, "%")
-    #score = model.evaluate(test_X, test_y, batch_size=batch_size)
-    #print(score)
-    #MODEL_NAME = f"new_models/{round(score[1]*100,2)}-acc-64x3-batch-norm-{epoch}epoch-{int(time.time())}-loss-{round(score[0],2)}.model"
-    #model.save(MODEL_NAME)
+    score = model.evaluate(test_X, test_y, batch_size=batch_size)
+
+    if score[1]*100 > 60:
+        MODEL_NAME = f"new_models/{round(score[1]*100,2)}-acc-{epochs}epoch-{int(time.time())}-loss-{round(score[0],2)}.model"
+        model.save(MODEL_NAME)
 #print("saved:")
 #print(MODEL_NAME)
 
