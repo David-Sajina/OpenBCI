@@ -13,7 +13,6 @@ def unison_shuffled_copies(a, b):
     return a[p], b[p]
 
 ACTIONS = ["krug", "kvadrat", "trokut"]
-#reshape = (-1, 16, 60)
 
 def create_data(starting_dir="data"):
     training_data = {}
@@ -32,11 +31,11 @@ def create_data(starting_dir="data"):
     print(lengths)
 
     for action in ACTIONS:
-        #np.random.shuffle(training_data[action])  # note that regular shuffle is GOOF af
         training_data[action] = training_data[action][:min(lengths)]
 
     lengths = [len(training_data[action]) for action in ACTIONS]
     print(lengths)
+
     # creating X, y 
     combined_data = []
     for action in ACTIONS:
@@ -46,13 +45,12 @@ def create_data(starting_dir="data"):
                 combined_data.append([data, 0])
 
             elif action == "kvadrat":
-                #np.append(combined_data, np.array([data, [1, 0]]))
                 combined_data.append([data, 1])
 
             elif action == "trokut":
                 combined_data.append([data, 2])
 
-   # np.random.shuffle(combined_data)
+
     print("length:", len(combined_data))
     return combined_data
 
@@ -79,8 +77,8 @@ print(len(test_X))
 
 print(np.array(train_X).shape)
 print(np.array(train_y).shape)
-train_X = np.array(train_X)#.reshape(reshape)
-test_X = np.array(test_X)#.reshape(reshape)
+train_X = np.array(train_X)
+test_X = np.array(test_X)
 train_y = np.array(train_y)
 test_y = np.array(test_y)
 param = 90
@@ -144,10 +142,8 @@ for epoch in range(epochs):
     print((epoch+1)*10, "%")
     score = model.evaluate(test_X, test_y, batch_size=batch_size)
 
-    if score[1]*100 > 60:
-        MODEL_NAME = f"new_models/{round(score[1]*100,2)}-acc-{epochs}epoch-{int(time.time())}-loss-{round(score[0],2)}.model"
-        model.save(MODEL_NAME)
-#print("saved:")
-#print(MODEL_NAME)
+    MODEL_NAME = f"new_models/{round(score[1]*100,2)}-acc-{epochs}epoch-{int(time.time())}-loss-{round(score[0],2)}.model"
+    model.save(MODEL_NAME)
+
 
 
