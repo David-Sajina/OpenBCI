@@ -13,7 +13,7 @@ def unison_shuffled_copies(a, b):
     return a[p], b[p]
 
 ACTIONS = ["krug", "kvadrat", "trokut"]
-
+#reshape = (-1, 16, 60)
 
 def create_data(starting_dir="data"):
     training_data = {}
@@ -23,7 +23,7 @@ def create_data(starting_dir="data"):
 
         data_dir = os.path.join(starting_dir,action)
         for item in os.listdir(data_dir):
-
+            #print(action, item)
             data = np.load(os.path.join(data_dir, item))
             for item in data:
                 training_data[action].append(item)
@@ -32,6 +32,7 @@ def create_data(starting_dir="data"):
     print(lengths)
 
     for action in ACTIONS:
+        #np.random.shuffle(training_data[action])  # note that regular shuffle is GOOF af
         training_data[action] = training_data[action][:min(lengths)]
 
     lengths = [len(training_data[action]) for action in ACTIONS]
@@ -45,12 +46,13 @@ def create_data(starting_dir="data"):
                 combined_data.append([data, 0])
 
             elif action == "kvadrat":
+                #np.append(combined_data, np.array([data, [1, 0]]))
                 combined_data.append([data, 1])
 
             elif action == "trokut":
                 combined_data.append([data, 2])
 
-
+   # np.random.shuffle(combined_data)
     print("length:", len(combined_data))
     return combined_data
 
@@ -94,9 +96,10 @@ indices = np.random.permutation(len(train_X))
 train_X = train_X[indices]
 train_y = train_y[indices]
 
-print("shape_train:", train_X.shape)
-print("shape_test:", test_X.shape)
-
+print("shape:", train_X.shape)
+print("shape:", train_y.shape)
+print("shapet:", test_X.shape)
+print("shapet:", test_y.shape)
 
 # samples, rows, cols, channels
 opt = tf.keras.optimizers.Adam(
@@ -141,7 +144,10 @@ for epoch in range(epochs):
     print((epoch+1)*10, "%")
     score = model.evaluate(test_X, test_y, batch_size=batch_size)
 
-    MODEL_NAME = f"new_models/{round(score[1]*100,2)}-acc-{epochs}epoch-{int(time.time())}-loss-{round(score[0],2)}.model"
-    model.save(MODEL_NAME)
+    if score[1]*100 > 60:
+        MODEL_NAME = f"new_models/{round(score[1]*100,2)}-acc-{epochs}epoch-{int(time.time())}-loss-{round(score[0],2)}.model"
+        model.save(MODEL_NAME)
+#print("saved:")
+#print(MODEL_NAME)
 
 
