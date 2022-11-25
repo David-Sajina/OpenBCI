@@ -3,10 +3,10 @@ import numpy as np
 import time
 import os
 
-OBJECT='kvadrat'
+OBJECT = 'pravokutnik'
 
 ITER_PER_SEC = 90 # iteracije po sekundi
-HM_SECONDS = 60  # Broj sekunda
+HM_SECONDS = 120  # Broj sekunda
 TOTAL_ITERS = HM_SECONDS*ITER_PER_SEC
 
 print("looking for an EEG stream...")
@@ -14,11 +14,13 @@ streams = resolve_stream('type', 'EEG')
 inlet = StreamInlet(streams[0])
 print("...stream resolved, starting!")
 
-for _ in range(ITER_PER_SEC * 10):
+print("starting focus time...")
+for _ in range(ITER_PER_SEC * 10): #focus time 10 sec
     for _ in range(16):
         inlet.pull_sample()
+print("...focus time over")
 
-
+print(f"started data gatther for object {OBJECT}")
 channel_datas = []
 for i in range(TOTAL_ITERS):
     channel_data = []
@@ -28,7 +30,7 @@ for i in range(TOTAL_ITERS):
 
     channel_datas.append(channel_data)
 
-datadir = "data"
+datadir = "New_Data"
 if not os.path.exists(datadir):
     os.mkdir(datadir)
 
@@ -39,7 +41,7 @@ if not os.path.exists(objectdir):
 print(len(channel_datas))
 print(f"Saving data for object {OBJECT}")
 np.save(os.path.join(objectdir, f"{int(time.time())}.npy"), np.array(channel_datas))
-print("done.")
+print(f"{OBJECT} done")
 
 
 
