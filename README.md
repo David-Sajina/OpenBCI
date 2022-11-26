@@ -18,6 +18,8 @@ Prikaz arhitekture CNN modela
 
 - Skup podataka(dataset) korišten u projektu nalazi se u [alldata/](alldata/) direktoriju.
 
+- Rad je dostupan na [linku](https://zir.nsk.hr/islandora/object/unipu%3A7209)
+
 ## Organizacija
 Sveučilište Jurja Dobrile u Puli </br>
 Fakultet informatike u Puli </br>
